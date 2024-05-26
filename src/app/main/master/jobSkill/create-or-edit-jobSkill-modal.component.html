@@ -10,14 +10,14 @@
 >
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form *ngIf="active" #jobSkillForm="ngForm" novalidate (ngSubmit)="save()" autocomplete="off">
+            <form [formGroup]="form" autocomplete="off">
                 <div class="modal-header">
                     <h4 class="modal-title">
-                        <span *ngIf="jobSkill.id">{{ l('EditJobSkill') }}</span>
-                        <span *ngIf="!jobSkill.id">{{ l('CreateNewJobSkill') }}</span>
+                        <span *ngIf="id">{{ l('EditJobSkill') }}</span>
+                        <span *ngIf="!id">{{ l('CreateNewJobSkill') }}</span>
                     </h4>
 
-                    <button type="button" class="btn-close" (click)="close()" aria-label="Close" [disabled]="saving">
+                    <button class="btn-close" (click)="close()" aria-label="Close" [disabled]="saving">
                        
                     </button>
                 </div>
@@ -26,11 +26,10 @@
                         <label for="JobSkill_Name">{{ l('Name') }}</label>
                         <input
                             type="text"
-                            #JobSkill_Name="ngModel"
+                            #JobSkill_Name
                             id="JobSkill_Name"
                             class="form-control"
-                            [(ngModel)]="jobSkill.name"
-                            name="Name"
+                            formControlName="name"
                         />
                         <validation-messages [formCtrl]="JobSkill_Name"></validation-messages>
                     </div>
@@ -39,23 +38,21 @@
                         <label for="JobSkill_Description">{{ l('Description') }}</label>
                         <input
                             type="text"
-                            #JobSkill_Description="ngModel"
+                            #JobSkill_Description
                             id="JobSkill_Description"
                             class="form-control"
-                            [(ngModel)]="jobSkill.description"
-                            name="Description"
+                            formControlName="description" 
                         />
                         <validation-messages [formCtrl]="JobSkill_Description"></validation-messages>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button [disabled]="saving" type="button" class="btn btn-default" (click)="close()">
+                    <button [disabled]="saving" class="btn btn-default" (click)="close()">
                         {{ l('Cancel') }}
                     </button>
                     <button
-                        type="submit"
                         class="btn btn-primary blue"
-                        [disabled]="!jobSkillForm.form.valid"
+                        (click)="save()"
                         [buttonBusy]="saving"
                         [busyText]="l('SavingWithThreeDot')"
                     >
@@ -64,6 +61,7 @@
                     </button>
                 </div>
             </form>
+            {{this.form.value|json}}
         </div>
     </div>
 </div>
