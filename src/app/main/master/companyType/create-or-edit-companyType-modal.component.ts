@@ -6,6 +6,7 @@ import { AppComponentBase } from '@shared/common/app-component-base';
 import { DateTime } from 'luxon';
 
 import { DateTimeService } from '@app/shared/common/timing/date-time.service';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 @Component({
     selector: 'createOrEditCompanyTypeModal',
@@ -20,37 +21,50 @@ export class CreateOrEditCompanyTypeModalComponent extends AppComponentBase impl
     saving = false;
 
     companyType: CreateOrEditCompanyTypeDto = new CreateOrEditCompanyTypeDto();
+    form: FormGroup;
+    id: string;
+   
 
     constructor(
         injector: Injector,
         private _companyTypeServiceProxy: CompanyTypeServiceProxy,
-        private _dateTimeService: DateTimeService
+        private _dateTimeService: DateTimeService,
+        private fb: FormBuilder,
     ) {
         super(injector);
     }
 
+    createForm(item: any = {}) {
+        this.form = this.fb.group({
+            name: [item.name ? item.name : '', Validators.required],
+            description: [item.description ? item.description : ''],
+            id: [item.id ? item.id : null],
+        });
+    }
+
     show(companyTypeId?: string): void {
-        if (!companyTypeId) {
-            this.companyType = new CreateOrEditCompanyTypeDto();
-            this.companyType.id = companyTypeId;
+        if (companyTypeId) {
+            // this.companyType = new CreateOrEditCompanyTypeDto();
+            this.id = companyTypeId;
 
-            this.active = true;
-            this.modal.show();
-        } else {
+        //     this.active = true;
+        //     this.modal.show();
+        // } else {
             this._companyTypeServiceProxy.getCompanyTypeForEdit(companyTypeId).subscribe((result) => {
-                this.companyType = result;
+                this.createForm(result)
 
-                this.active = true;
-                this.modal.show();
+                
             });
         }
+        this.active = true;
+                this.modal.show();
     }
 
     save(): void {
         this.saving = true;
 
         this._companyTypeServiceProxy
-            .createOrEdit(this.companyType)
+            .createOrEdit(this.form.getRawValue())
             .pipe(
                 finalize(() => {
                     this.saving = false;
@@ -59,6 +73,7 @@ export class CreateOrEditCompanyTypeModalComponent extends AppComponentBase impl
             .subscribe(() => {
                 this.notify.info(this.l('SavedSuccessfully'));
                 this.close();
+                this.form.reset();
                 this.modalSave.emit(null);
             });
     }
@@ -68,5 +83,7 @@ export class CreateOrEditCompanyTypeModalComponent extends AppComponentBase impl
         this.modal.hide();
     }
 
-    ngOnInit(): void {}
+    ngOnInit(): void {
+    this.createForm();
+    }
 }
