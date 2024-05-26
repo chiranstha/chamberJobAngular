@@ -6,6 +6,7 @@ import { AppComponentBase } from '@shared/common/app-component-base';
 import { DateTime } from 'luxon';
 
 import { DateTimeService } from '@app/shared/common/timing/date-time.service';
+import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 
 @Component({
     selector: 'createOrEditJobSkillModal',
@@ -18,39 +19,43 @@ export class CreateOrEditJobSkillModalComponent extends AppComponentBase impleme
 
     active = false;
     saving = false;
+    id:string;
+    form: FormGroup;
 
-    jobSkill: CreateOrEditJobSkillDto = new CreateOrEditJobSkillDto();
-
+   
     constructor(
         injector: Injector,
         private _jobSkillServiceProxy: JobSkillServiceProxy,
-        private _dateTimeService: DateTimeService
+        private _dateTimeService: DateTimeService,
+        private fb: FormBuilder
     ) {
         super(injector);
     }
 
     show(jobSkillId?: string): void {
-        if (!jobSkillId) {
-            this.jobSkill = new CreateOrEditJobSkillDto();
-            this.jobSkill.id = jobSkillId;
-
-            this.active = true;
-            this.modal.show();
-        } else {
+        if (jobSkillId) {
+            this.id=jobSkillId;
             this._jobSkillServiceProxy.getJobSkillForEdit(jobSkillId).subscribe((result) => {
-                this.jobSkill = result;
+                this.createForm(result);
 
-                this.active = true;
-                this.modal.show();
+               
             });
         }
+        this.active = true;
+        this.modal.show();
     }
-
+    createForm(item: any = {}): void {
+        this.form = this.fb.group({
+          id: [item.id?item.id:null],
+          name: [item.name || '', Validators.required],
+          description: [item.description || ''],
+        });
+      }
     save(): void {
         this.saving = true;
 
         this._jobSkillServiceProxy
-            .createOrEdit(this.jobSkill)
+            .createOrEdit(this.form.getRawValue())
             .pipe(
                 finalize(() => {
                     this.saving = false;
@@ -68,5 +73,7 @@ export class CreateOrEditJobSkillModalComponent extends AppComponentBase impleme
         this.modal.hide();
     }
 
-    ngOnInit(): void {}
+    ngOnInit(): void {
+        this.createForm();
+    }
 }
