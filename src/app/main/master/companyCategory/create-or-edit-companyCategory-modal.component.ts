@@ -6,6 +6,7 @@ import { AppComponentBase } from '@shared/common/app-component-base';
 import { DateTime } from 'luxon';
 
 import { DateTimeService } from '@app/shared/common/timing/date-time.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
     selector: 'createOrEditCompanyCategoryModal',
@@ -18,39 +19,51 @@ export class CreateOrEditCompanyCategoryModalComponent extends AppComponentBase 
 
     active = false;
     saving = false;
+    id : number;
+    form: FormGroup;
 
     companyCategory: CreateOrEditCompanyCategoryDto = new CreateOrEditCompanyCategoryDto();
 
     constructor(
         injector: Injector,
         private _companyCategoryServiceProxy: CompanyCategoryServiceProxy,
-        private _dateTimeService: DateTimeService
+        private _dateTimeService: DateTimeService,
+        private fb: FormBuilder,
     ) {
         super(injector);
     }
 
+    createForm(item: any = {}) {
+        this.form = this.fb.group({
+            name: [item.name ? item.name : '', Validators.required],
+            description: [item.description ? item.description : ''],
+            id: [item.id ? item.id : null],
+        });
+    }
+
     show(companyCategoryId?: number): void {
-        if (!companyCategoryId) {
-            this.companyCategory = new CreateOrEditCompanyCategoryDto();
-            this.companyCategory.id = companyCategoryId;
+        if (companyCategoryId) {
+            // this.companyCategory = new CreateOrEditCompanyCategoryDto();
+            this.id = companyCategoryId;
 
-            this.active = true;
-            this.modal.show();
-        } else {
+        //     this.active = true;
+        //     this.modal.show();
+        // } else {
             this._companyCategoryServiceProxy.getCompanyCategoryForEdit(companyCategoryId).subscribe((result) => {
-                this.companyCategory = result;
+                this.createForm(result);
 
-                this.active = true;
-                this.modal.show();
+                
             });
         }
+        this.active = true;
+                this.modal.show();
     }
 
     save(): void {
         this.saving = true;
 
         this._companyCategoryServiceProxy
-            .createOrEdit(this.companyCategory)
+            .createOrEdit(this.form.getRawValue())
             .pipe(
                 finalize(() => {
                     this.saving = false;
@@ -59,6 +72,7 @@ export class CreateOrEditCompanyCategoryModalComponent extends AppComponentBase 
             .subscribe(() => {
                 this.notify.info(this.l('SavedSuccessfully'));
                 this.close();
+                this.form.reset();
                 this.modalSave.emit(null);
             });
     }
@@ -66,7 +80,10 @@ export class CreateOrEditCompanyCategoryModalComponent extends AppComponentBase 
     close(): void {
         this.active = false;
         this.modal.hide();
+        this.form.reset();
     }
 
-    ngOnInit(): void {}
+    ngOnInit(): void {
+        this.createForm();
+    }
 }

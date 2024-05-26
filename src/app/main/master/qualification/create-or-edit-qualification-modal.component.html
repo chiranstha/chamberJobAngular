@@ -10,7 +10,7 @@
 >
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form *ngIf="active" #qualificationForm="ngForm" novalidate (ngSubmit)="save()" autocomplete="off">
+            <form *ngIf="active" [formGroup]="form"  #qualificationForm novalidate (ngSubmit)="save()" autocomplete="off">
                 <div class="modal-header">
                     <h4 class="modal-title">
                         <span *ngIf="qualification.id">{{ l('EditQualification') }}</span>
@@ -26,10 +26,10 @@
                         <label for="Qualification_Name">{{ l('Name') }} *</label>
                         <input
                             type="text"
-                            #Qualification_Name="ngModel"
+                            #Qualification_Name
                             id="Qualification_Name"
                             class="form-control"
-                            [(ngModel)]="qualification.name"
+                            formControlName="name"
                             name="Name"
                             required
                         />
@@ -40,11 +40,11 @@
                         <label for="Qualification_Description">{{ l('Description') }}</label>
                         <input
                             type="text"
-                            #Qualification_Description="ngModel"
+                            #Qualification_Description
                             id="Qualification_Description"
                             class="form-control"
-                            [(ngModel)]="qualification.description"
-                            name="Description"
+                            formControlName="description"
+                            name="description"
                         />
                         <validation-messages [formCtrl]="Qualification_Description"></validation-messages>
                     </div>
@@ -56,7 +56,7 @@
                     <button
                         type="submit"
                         class="btn btn-primary blue"
-                        [disabled]="!qualificationForm.form.valid"
+                        [disabled]="!form.valid"
                         [buttonBusy]="saving"
                         [busyText]="l('SavingWithThreeDot')"
                     >

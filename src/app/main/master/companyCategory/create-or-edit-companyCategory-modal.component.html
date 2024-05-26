@@ -10,7 +10,7 @@
 >
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form *ngIf="active" #companyCategoryForm="ngForm" novalidate (ngSubmit)="save()" autocomplete="off">
+            <form *ngIf="active" [formGroup]="form" novalidate (ngSubmit)="save()" autocomplete="off">
                 <div class="modal-header">
                     <h4 class="modal-title">
                         <span *ngIf="companyCategory.id">{{ l('EditCompanyCategory') }}</span>
@@ -26,11 +26,11 @@
                         <label for="CompanyCategory_Name">{{ l('Name') }} *</label>
                         <input
                             type="text"
-                            #CompanyCategory_Name="ngModel"
+                            #CompanyCategory_Name
                             id="CompanyCategory_Name"
                             class="form-control"
-                            [(ngModel)]="companyCategory.name"
-                            name="Name"
+                            formControlName="name"
+                            
                             required
                         />
                         <validation-messages [formCtrl]="CompanyCategory_Name"></validation-messages>
@@ -40,11 +40,11 @@
                         <label for="CompanyCategory_Description">{{ l('Description') }}</label>
                         <input
                             type="text"
-                            #CompanyCategory_Description="ngModel"
+                            #CompanyCategory_Description
                             id="CompanyCategory_Description"
                             class="form-control"
-                            [(ngModel)]="companyCategory.description"
-                            name="Description"
+                            formControlName="description"
+                            
                         />
                         <validation-messages [formCtrl]="CompanyCategory_Description"></validation-messages>
                     </div>
@@ -56,15 +56,16 @@
                     <button
                         type="submit"
                         class="btn btn-primary blue"
-                        [disabled]="!companyCategoryForm.form.valid"
+                        [disabled]="!form.valid"
                         [buttonBusy]="saving"
                         [busyText]="l('SavingWithThreeDot')"
-                    >
+                    >   
                         <i class="fa fa-save"></i>
                         <span>{{ l('Save') }}</span>
                     </button>
                 </div>
             </form>
+            {{this.form.value | json}}
         </div>
     </div>
 </div>

@@ -81,6 +81,7 @@ export class CreateOrEditCompanyTypeModalComponent extends AppComponentBase impl
     close(): void {
         this.active = false;
         this.modal.hide();
+        this.form.reset();
     }
 
     ngOnInit(): void {

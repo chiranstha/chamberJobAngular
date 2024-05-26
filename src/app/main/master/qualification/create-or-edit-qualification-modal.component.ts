@@ -6,6 +6,7 @@ import { AppComponentBase } from '@shared/common/app-component-base';
 import { DateTime } from 'luxon';
 
 import { DateTimeService } from '@app/shared/common/timing/date-time.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
     selector: 'createOrEditQualificationModal',
@@ -18,39 +19,51 @@ export class CreateOrEditQualificationModalComponent extends AppComponentBase im
 
     active = false;
     saving = false;
+    id: number;
+    form: FormGroup;
 
     qualification: CreateOrEditQualificationDto = new CreateOrEditQualificationDto();
 
     constructor(
         injector: Injector,
         private _qualificationServiceProxy: QualificationServiceProxy,
-        private _dateTimeService: DateTimeService
+        private _dateTimeService: DateTimeService,
+        private fb: FormBuilder
     ) {
         super(injector);
     }
 
+    createForm(item: any = {}) {
+        this.form = this.fb.group({
+            name: [item.name ? item.name : '', Validators.required],
+            description: [item.description ? item.description : ''],
+            id: [item.id ? item.id : null],
+        });
+    }
+
     show(qualificationId?: string): void {
-        if (!qualificationId) {
-            this.qualification = new CreateOrEditQualificationDto();
+        if (qualificationId) {
+            // this.qualification = new CreateOrEditQualificationDto();
             this.qualification.id = qualificationId;
 
-            this.active = true;
-            this.modal.show();
-        } else {
+            //     this.active = true;
+            //     this.modal.show();
+            // } else {
             this._qualificationServiceProxy.getQualificationForEdit(qualificationId).subscribe((result) => {
-                this.qualification = result;
+                this.createForm(result);
 
-                this.active = true;
-                this.modal.show();
+
             });
         }
+        this.active = true;
+        this.modal.show();
     }
 
     save(): void {
         this.saving = true;
 
         this._qualificationServiceProxy
-            .createOrEdit(this.qualification)
+            .createOrEdit(this.form.getRawValue())
             .pipe(
                 finalize(() => {
                     this.saving = false;
@@ -59,6 +72,7 @@ export class CreateOrEditQualificationModalComponent extends AppComponentBase im
             .subscribe(() => {
                 this.notify.info(this.l('SavedSuccessfully'));
                 this.close();
+                this.form.reset();
                 this.modalSave.emit(null);
             });
     }
@@ -66,7 +80,10 @@ export class CreateOrEditQualificationModalComponent extends AppComponentBase im
     close(): void {
         this.active = false;
         this.modal.hide();
+        this.form.reset();
     }
 
-    ngOnInit(): void {}
+    ngOnInit(): void {
+        this.createForm();
+     }
 }
